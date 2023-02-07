@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mc
+  template:
+    metadata:
+      labels:
+        app: mc
+    spec:
+      containers:
+      - name: mc-container
+        image: minio/mc
+        command: ["sh", "-c", "mc alias set minio $HOST $USER $PASSWORD --api S3v4 && \
+                   mc ls minio && \
+                   mc ilm add minio/my-bucket-1 --expiry-days 30 && sleep infinity"]           # mc is used to add policy to my-bucket-1 to delete all the items in it after 30 days
+        env:
+          - name: HOST
+            valueFrom: 
+              configMapKeyRef:
+                name: minio-config
+                key: minio-server-url
+          - name: USER
+            valueFrom:
+              secretKeyRef:
+                  name: minio-cred
+                  key: minio_access_key
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: minio-cred
+                key: minio_secret_key    
+        securityContext:
+          allowPrivilegeEscalation: true

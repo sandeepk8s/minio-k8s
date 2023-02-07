@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minio-config
+data:
+  minio-server-url: https://xxxxx/
+  minio-browser-url: https://xxxxx/
